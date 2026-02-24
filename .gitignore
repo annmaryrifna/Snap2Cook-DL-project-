@@ -1,0 +1,19 @@
+# Ignore virtual environment
+Project/venv/
+
+# Ignore model folder
+Project/model/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore ML model files
+*.h5
+*.pth
+*.pt
+*.pkl
+*.json
+
+# Ignore environment file
+.env
