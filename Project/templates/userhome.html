@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sous-Chef | Ingredient & Recipe Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+        <header class="hero">
+            <h1>🍎 AI <span class="accent">Snap2Cook</span></h1>
+            <p>Snap a photo of an ingredient, and we'll handle the rest.</p>
+        </header>
+
+        <section class="upload-section">
+            <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-box" onclick="document.getElementById('fileInput').click();">
+                    <div class="upload-icon">📸</div>
+                    <p>Click to upload or drag an image here</p>
+                    <input type="file" name="image" id="fileInput" required hidden
+                        onchange="this.form.submit(); showLoading()">
+                </div>
+                <div id="loading" class="loading-spinner" style="display:none;">
+                    <div class="spinner"></div>
+                    <p>Analyzing flavors...</p>
+                </div>
+            </form>
+        </section>
+
+        {% if prediction %}
+        <section class="prediction-display">
+            <div class="result-card">
+                <div class="result-image-wrapper">
+                    <img src="{{ image_path }}" class="uploaded-img">
+                </div>
+                <div class="result-info">
+                    <span class="badge">Ingredient Identified</span>
+                    <h2>{{ prediction }}</h2>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar" style="width: {{ confidence * 100 }}%"></div>
+                    </div>
+                    <p class="confidence-text">Match Score: <strong>{{ (confidence * 100) | round(1) }}%</strong></p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if recipes %}
+        <section class="recipe-section">
+            <h2 class="section-title">🍽️ Recommended Recipes</h2>
+            <div class="recipe-grid">
+                {% for r in recipes %}
+                <div class="recipe-card">
+                    <div class="card-img-container">
+                        <img src="{{ r.image if r.image else url_for('static', filename='images/no_images.jpg') }}"
+                            alt="Recipe" onerror="this.src='{{ url_for('static', filename='images/no_images.jpg') }}'">
+                        <span class="calories-tag">{{ r.calories }} kcal</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>{{ r.name }}</h3>
+                        <p class="ingredients-preview">{{ r.ingredients_simple | join(" • ") }}</p>
+
+                        <button class="toggle-btn" onclick="toggleDetails(this)">View Recipe</button>
+
+                        <div class="recipe-details">
+                            <hr>
+                            <h4>🛒 Ingredients</h4>
+                            <ul>
+                                {% for ing in r.ingredients_full %}
+                                <li>{{ ing }}</li>
+                                {% endfor %}
+                            </ul>
+                            <h4>👨‍🍳 Instructions</h4>
+                            <ol>
+                                {% for step in r.instructions %}
+                                <li>{{ step }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleDetails(button) {
+            const details = button.nextElementSibling;
+            const isHidden = details.style.display === "none" || !details.style.display;
+            details.style.display = isHidden ? "block" : "none";
+            button.innerText = isHidden ? "Close Recipe" : "View Recipe";
+            button.classList.toggle('active');
+        }
+
+        function showLoading() {
+            document.querySelector('.upload-box').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

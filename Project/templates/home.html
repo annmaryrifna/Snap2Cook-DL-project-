@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Snap2Cook – Snap. Identify. Cook.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+
+    <!-- ── NAVIGATION ── -->
+    <nav class="nav">
+        <a href="/" class="nav__brand">
+            <div class="nav__logo">🍳</div>
+            <span class="nav__wordmark">Snap2Cook</span>
+        </a>
+        <ul class="nav__links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#accuracy">Accuracy</a></li>
+        </ul>
+        <a href="/login" class="nav__cta">Login →</a>
+    </nav>
+
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+        <div class="hero__bg">
+            <div class="hero__bg-img"></div>
+            <div class="hero__bg-overlay"></div>
+        </div>
+
+        <div class="hero__grid">
+            <!-- LEFT -->
+            <div class="hero__left">
+                <div class="hero__tag">
+                    <div class="hero__tag-dot"></div>
+                    AI-Powered Ingredient Recognition
+                </div>
+
+                <h1 class="hero__title">
+                    SNAP<br>
+                    YOUR<br>
+                    <span class="hero__title-accent">KITCHEN.</span>
+                </h1>
+
+                <p class="hero__desc">
+                    Upload any fruit or vegetable photo — our ResNet50 deep-learning model identifies it instantly and
+                    delivers calorie-matched recipes, tailored exactly to what you have.
+                </p>
+
+                <div class="hero__actions">
+                    <a href="/login" class="btn--primary">Start Cooking Free →</a>
+                    <a href="#how" class="btn--outline">How It Works</a>
+                </div>
+            </div>
+
+            <!-- RIGHT — MOCKUP -->
+            <div class="hero__right">
+                <div style="position: relative;">
+                    <div class="mockup">
+                        <div class="mockup__header">
+                            <div class="mockup__dots">
+                                <div class="mockup__dot"></div>
+                                <div class="mockup__dot"></div>
+                                <div class="mockup__dot"></div>
+                            </div>
+                            <span class="mockup__title">🍳 Snap2Cook</span>
+                        </div>
+                        <div class="mockup__body">
+                            <div class="mockup__scan">
+                                <div class="mockup__scan-line"></div>
+                                <div class="mockup__scan-emoji">🥕</div>
+                                <span class="mockup__scan-text">Analysing ingredient…</span>
+                            </div>
+                            <div class="mockup__pills">
+                                <span class="pill">🥕 Carrot</span>
+                                <span class="pill">98.2% match</span>
+                            </div>
+                            <div class="mockup__recipe">
+                                <img class="mockup__recipe-img"
+                                    src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=80&q=70"
+                                    alt="Carrot Ginger Soup" />
+                                <div>
+                                    <div class="mockup__recipe-name">Carrot Ginger Soup</div>
+                                    <div class="mockup__recipe-cal">210 kcal · Top match</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fbadge fbadge--a">✓ Ingredient identified</div>
+                    <div class="fbadge fbadge--b">🍽️ 6 recipes matched!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TICKER STRIP -->
+        <div class="hero__ticker">
+            <div class="ticker__track">
+                <span class="ticker__item"><span>50+</span> Ingredients Detected</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>1,000+</span> Recipes Available</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>98%</span> Model Accuracy</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>ResNet50</span> Deep Learning</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>TF-IDF</span> Recipe Matching</span>
+                <span class="ticker__item">✦</span>
+                <!-- duplicate for seamless loop -->
+                <span class="ticker__item"><span>50+</span> Ingredients Detected</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>1,000+</span> Recipes Available</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>98%</span> Model Accuracy</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>ResNet50</span> Deep Learning</span>
+                <span class="ticker__item">✦</span>
+                <span class="ticker__item"><span>TF-IDF</span> Recipe Matching</span>
+                <span class="ticker__item">✦</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ── BENTO FEATURES GRID ── -->
+    <section class="bento-section" id="features">
+        <div class="section-kicker">Features</div>
+        <h2 class="section-title">SMART TOOLS FOR<br><em>Smart Cooks</em></h2>
+        <p class="section-sub">Everything you need to go from raw ingredient to perfect plate — powered by machine
+            learning.</p>
+
+        <div class="bento">
+
+            <!-- A: ResNet50 -->
+            <div class="bento__cell bento__cell--a">
+                <div class="bento__content" style="justify-content: flex-start; padding-top: 1.8rem;">
+                    <div class="bento__icon">🔍</div>
+                    <div class="bento__label">AI Core</div>
+                    <div class="bento__title">ResNet50 Recognition</div>
+                    <div class="bento__desc">State-of-the-art CNN identifies ingredients from any angle or lighting.
+                    </div>
+                </div>
+            </div>
+
+            <!-- B: Photo (image cell) -->
+            <div class="bento__cell bento__cell--b">
+                <div class="bento__content">
+                    <div class="bento__tag">✓ Visual AI</div>
+                    <div class="bento__title" style="color:#fff">Snap &amp; Identify</div>
+                </div>
+            </div>
+
+            <!-- C: Big stat -->
+            <div class="bento__cell bento__cell--c">
+                <div class="bento__content" style="justify-content: center; align-items: flex-start;">
+                    <div class="bento__label">Accuracy Rate</div>
+                    <div class="bento__big-num">98<span>%</span></div>
+                    <div class="bento__desc">Model precision across 50+ ingredient categories.</div>
+                </div>
+            </div>
+
+            <!-- D: Calorie Filter -->
+            <div class="bento__cell bento__cell--d">
+                <div class="bento__content" style="justify-content: flex-end;">
+                    <div class="bento__icon">🔥</div>
+                    <div class="bento__title">Calorie Filter</div>
+                    <div class="bento__desc">Set your max calorie target. Only matching recipes surface.</div>
+                </div>
+            </div>
+
+            <!-- E: Image cell -->
+            <div class="bento__cell bento__cell--e">
+                <div class="bento__content">
+                    <div class="bento__tag">🌍 Global Cuisines</div>
+                    <div class="bento__title" style="color:#fff">1,000+ Recipes</div>
+                </div>
+            </div>
+
+            <!-- F: Secure -->
+            <div class="bento__cell bento__cell--f">
+                <div class="bento__content" style="justify-content: flex-start; padding-top: 1.8rem;">
+                    <div class="bento__icon">🛡️</div>
+                    <div class="bento__label">Security</div>
+                    <div class="bento__title">Secure Login</div>
+                    <div class="bento__desc">Session-protected access — only authorised users reach the AI.</div>
+                </div>
+            </div>
+
+            <!-- G: Instant -->
+            <div class="bento__cell bento__cell--g">
+                <div class="bento__content" style="justify-content: flex-start; padding-top: 1.8rem;">
+                    <div class="bento__icon">⚡</div>
+                    <div class="bento__label">Performance</div>
+                    <div class="bento__title">Instant Results</div>
+                    <div class="bento__desc">End-to-end prediction and recipe matching in seconds.</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ── HOW IT WORKS ── -->
+    <section class="how-section" id="how">
+        <div class="section-kicker">Simple &amp; Fast</div>
+        <h2 class="section-title">FROM SNAP<br>TO PLATE</h2>
+        <p class="section-sub">Three steps. Zero guesswork. Just point, shoot, and cook.</p>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <div class="step-emoji">📸</div>
+                <div class="step-name">Upload a Photo</div>
+                <div class="step-text">Take a clear photo of any fruit or vegetable and upload it directly to Snap2Cook.
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <div class="step-emoji">🧠</div>
+                <div class="step-name">AI Identifies It</div>
+                <div class="step-text">Our ResNet50 model analyses the image and predicts your ingredient with high
+                    confidence.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <div class="step-emoji">🍽️</div>
+                <div class="step-name">Get Matched Recipes</div>
+                <div class="step-text">Receive curated recipes filtered to your calorie target, complete with
+                    step-by-step instructions.</div>
+            </div>
+        </div>
+    </section>
+
+
+   
+    <!-- ── CTA ── -->
+    <section class="cta-section">
+        <div class="cta__bg"></div>
+        <div class="cta__overlay"></div>
+        <div class="cta__grid-lines"></div>
+        <div class="cta__content">
+            <div class="cta__eyebrow">✦ Start Today ✦</div>
+            <h2 class="cta__title">COOK<br><em>Smarter.</em></h2>
+            <p class="cta__desc">Log in and let AI pick your next meal from what's already in your kitchen.</p>
+            <a href="/login" class="btn--cta">Get Started Free →</a>
+        </div>
+    </section>
+
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="footer__left">
+            <div class="nav__logo" style="width:30px;height:30px;font-size:.9rem">🍳</div>
+            <span class="footer__wordmark">Snap2Cook</span>
+        </div>
+        <span class="footer__copy">© 2024 Snap2Cook · Built with Python Flask & ResNet50</span>
+        <ul class="footer__links">
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="/login">Login</a></li>
+        </ul>
+    </footer>
+
+</body>
+
+</html>

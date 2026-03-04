@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}{% if tab == 'signup' %}Sign Up{% else %}Login{% endif %} — Snap2Cook{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+{% endblock %}
+
+{% block body %}
+
+<!-- ── FLASH MESSAGES ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash flash--{{ category }}">
+        {% if category == 'success' %}✓{% elif category == 'error' %}⚠{% else %}ℹ{% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="auth-page">
+
+    <!-- ── LEFT VISUAL PANEL ── -->
+    <div class="auth-visual">
+        <div class="auth-visual__bg"></div>
+        <div class="auth-visual__overlay"></div>
+        <div class="auth-visual__grid"></div>
+
+        <a href="{{ url_for('home') }}" class="auth-visual__brand">
+            <div class="auth-visual__logo">🍳</div>
+            <span class="auth-visual__wordmark">Snap2Cook</span>
+        </a>
+
+        <div class="auth-visual__content">
+            <div class="auth-visual__eyebrow">AI Ingredient Recognition</div>
+            <h2 class="auth-visual__title">
+                COOK WITH<br>
+                WHAT YOU<br>
+                <em>Have.</em>
+            </h2>
+            <p class="auth-visual__desc">
+                Upload a photo of any fruit or vegetable. Our ResNet50 model identifies it instantly and matches
+                delicious calorie-aware recipes, just for you.
+            </p>
+            <div class="auth-visual__stats">
+                <div class="vis-stat">
+                    <span class="vis-stat__num">98%</span>
+                    <span class="vis-stat__label">Accuracy</span>
+                </div>
+                <div class="vis-stat">
+                    <span class="vis-stat__num">1K+</span>
+                    <span class="vis-stat__label">Recipes</span>
+                </div>
+                <div class="vis-stat">
+                    <span class="vis-stat__num">50+</span>
+                    <span class="vis-stat__label">Ingredients</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT FORM PANEL ── -->
+    <div class="auth-form-panel">
+        <div class="auth-card">
+
+            <div class="auth-card__header">
+                <div class="auth-card__kicker">Welcome</div>
+                <h1 class="auth-card__title" id="cardTitle">
+                    {{ 'SIGN UP' if tab == 'signup' else 'SIGN IN' }}
+                </h1>
+                <p class="auth-card__sub" id="cardSub">
+                    {{ 'Create your free Snap2Cook account.' if tab == 'signup' else 'Access your Snap2Cook account.' }}
+                </p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button class="auth-tab {% if tab != 'signup' %}active{% endif %}" onclick="switchTab('login')"
+                    type="button">Login</button>
+                <button class="auth-tab {% if tab == 'signup' %}active{% endif %}" onclick="switchTab('signup')"
+                    type="button">Sign Up</button>
+            </div>
+
+            <!-- ── LOGIN FORM ── -->
+            <form class="auth-form {% if tab != 'signup' %}active{% endif %}" id="formLogin" method="POST"
+                action="{{ url_for('login') }}" novalidate>
+
+                <div class="form-group">
+                    <label class="form-label" for="loginUsername">Username</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">👤</span>
+                        <input class="form-input" type="text" id="loginUsername" name="username"
+                            placeholder="Enter your username" autocomplete="username" required />
+                    </div>
+                    <span class="field-error" id="loginUsernameErr">Please enter your username.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="loginPassword">Password</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">🔒</span>
+                        <input class="form-input" type="password" id="loginPassword" name="password"
+                            placeholder="Enter your password" autocomplete="current-password" required />
+                        <button type="button" class="pw-toggle" onclick="togglePw('loginPassword',this)">👁</button>
+                    </div>
+                    <span class="field-error" id="loginPasswordErr">Please enter your password.</span>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnLogin">
+                    <span>Sign In →</span>
+                </button>
+
+                <div class="auth-switch">
+                    Don't have an account?
+                    <a onclick="switchTab('signup')">Create one free</a>
+                </div>
+            </form>
+
+            <!-- ── SIGNUP FORM ── -->
+            <form class="auth-form {% if tab == 'signup' %}active{% endif %}" id="formSignup" method="POST"
+                action="{{ url_for('signup') }}" novalidate>
+
+                <div class="form-group">
+                    <label class="form-label" for="signupUsername">Username</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">👤</span>
+                        <input class="form-input" type="text" id="signupUsername" name="username"
+                            placeholder="Choose a username" autocomplete="username" required />
+                    </div>
+                    <span class="field-error" id="signupUsernameErr">Username must be at least 3 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signupEmail">Email Address</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">✉️</span>
+                        <input class="form-input" type="email" id="signupEmail" name="email"
+                            placeholder="you@example.com" autocomplete="email" required />
+                    </div>
+                    <span class="field-error" id="signupEmailErr">Please enter a valid email address.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signupPassword">Password</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">🔒</span>
+                        <input class="form-input" type="password" id="signupPassword" name="password"
+                            placeholder="At least 6 characters" autocomplete="new-password" required />
+                        <button type="button" class="pw-toggle" onclick="togglePw('signupPassword',this)">👁</button>
+                    </div>
+                    <span class="field-error" id="signupPasswordErr">Password must be at least 6 characters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signupConfirm">Confirm Password</label>
+                    <div class="form-input-wrap">
+                        <span class="form-icon">🔒</span>
+                        <input class="form-input" type="password" id="signupConfirm" name="confirm"
+                            placeholder="Repeat your password" autocomplete="new-password" required />
+                        <button type="button" class="pw-toggle" onclick="togglePw('signupConfirm',this)">👁</button>
+                    </div>
+                    <span class="field-error" id="signupConfirmErr">Passwords do not match.</span>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSignup">
+                    <span>Create Account →</span>
+                </button>
+
+                <div class="auth-switch">
+                    Already have an account?
+                    <a onclick="switchTab('login')">Sign in</a>
+                </div>
+            </form>
+
+        </div><!-- /auth-card -->
+    </div><!-- /auth-form-panel -->
+
+</div><!-- /auth-page -->
+
+<script>
+    /* ── Tab switcher ── */
+    function switchTab(tab) {
+        const isLogin = tab === 'login';
+
+        document.getElementById('tabLogin')?.classList.toggle('active', isLogin);
+        document.getElementById('tabSignup')?.classList.toggle('active', !isLogin);
+        document.getElementById('formLogin')?.classList.toggle('active', isLogin);
+        document.getElementById('formSignup')?.classList.toggle('active', !isLogin);
+
+        document.getElementById('cardTitle').textContent = isLogin ? 'SIGN IN' : 'SIGN UP';
+        document.getElementById('cardSub').textContent = isLogin
+            ? 'Access your Snap2Cook account.'
+            : 'Create your free Snap2Cook account.';
+
+        clearErrors();
+    }
+
+    /* find tabs by onclick (need IDs) */
+    document.querySelectorAll('.auth-tab').forEach((btn, i) => {
+        btn.id = i === 0 ? 'tabLogin' : 'tabSignup';
+    });
+
+    /* ── Password visibility toggle ── */
+    function togglePw(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+        else { input.type = 'password'; btn.textContent = '👁'; }
+    }
+
+    /* ── Client-side validation before POST ── */
+    document.getElementById('formLogin').addEventListener('submit', function (e) {
+        clearErrors();
+        let ok = true;
+        if (!this.username.value.trim()) { showErr('loginUsernameErr', 'loginUsername'); ok = false; }
+        if (!this.password.value) { showErr('loginPasswordErr', 'loginPassword'); ok = false; }
+        if (!ok) e.preventDefault();
+    });
+
+    document.getElementById('formSignup').addEventListener('submit', function (e) {
+        clearErrors();
+        let ok = true;
+        if (this.username.value.trim().length < 3) { showErr('signupUsernameErr', 'signupUsername'); ok = false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.value)) { showErr('signupEmailErr', 'signupEmail'); ok = false; }
+        if (this.password.value.length < 6) { showErr('signupPasswordErr', 'signupPassword'); ok = false; }
+        if (this.password.value !== this.confirm.value) { showErr('signupConfirmErr', 'signupConfirm'); ok = false; }
+        if (!ok) e.preventDefault();
+    });
+
+    function showErr(errId, inputId) {
+        document.getElementById(errId)?.classList.add('visible');
+        document.getElementById(inputId)?.classList.add('error');
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.field-error').forEach(e => e.classList.remove('visible'));
+        document.querySelectorAll('.form-input').forEach(e => e.classList.remove('error'));
+    }
+
+    /* clear on type */
+    document.querySelectorAll('.form-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+            inp.classList.remove('error');
+            const err = document.getElementById(inp.id + 'Err');
+            if (err) err.classList.remove('visible');
+        });
+    });
+</script>
+
+{% endblock %}
