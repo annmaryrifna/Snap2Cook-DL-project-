@@ -1,111 +1,593 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Sous-Chef | Ingredient & Recipe Predictor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-        rel="stylesheet">
-</head>
+{% block title %}Welcome, {{ username }} — Snap2Cook{% endblock %}
 
-<body>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/userhome.css') }}" />
+{% endblock %}
 
-    <div class="container">
-        <header class="hero">
-            <h1>🍎 AI <span class="accent">Snap2Cook</span></h1>
-            <p>Snap a photo of an ingredient, and we'll handle the rest.</p>
-        </header>
+{% block body %}
 
-        <section class="upload-section">
-            <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                <div class="upload-box" onclick="document.getElementById('fileInput').click();">
-                    <div class="upload-icon">📸</div>
-                    <p>Click to upload or drag an image here</p>
-                    <input type="file" name="image" id="fileInput" required hidden
-                        onchange="this.form.submit(); showLoading()">
-                </div>
-                <div id="loading" class="loading-spinner" style="display:none;">
-                    <div class="spinner"></div>
-                    <p>Analyzing flavors...</p>
-                </div>
-            </form>
-        </section>
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a href="{{ url_for('home') }}" class="nav__brand">
+    <div class="nav__logo">🍳</div>
+    <span class="nav__wordmark">Snap2Cook</span>
+  </a>
+  <ul class="nav__links">
+    <li><a href="{{ url_for('userhome') }}">My Kitchen</a></li>
+  </ul>
+  <div class="nav__right">
 
-        {% if prediction %}
-        <section class="prediction-display">
-            <div class="result-card">
-                <div class="result-image-wrapper">
-                    <img src="{{ image_path }}" class="uploaded-img">
-                </div>
-                <div class="result-info">
-                    <span class="badge">Ingredient Identified</span>
-                    <h2>{{ prediction }}</h2>
-                    <div class="confidence-bar-container">
-                        <div class="confidence-bar" style="width: {{ confidence * 100 }}%"></div>
-                    </div>
-                    <p class="confidence-text">Match Score: <strong>{{ (confidence * 100) | round(1) }}%</strong></p>
-                </div>
-            </div>
-        </section>
-        {% endif %}
-
-        {% if recipes %}
-        <section class="recipe-section">
-            <h2 class="section-title">🍽️ Recommended Recipes</h2>
-            <div class="recipe-grid">
-                {% for r in recipes %}
-                <div class="recipe-card">
-                    <div class="card-img-container">
-                        <img src="{{ r.image if r.image else url_for('static', filename='images/no_images.jpg') }}"
-                            alt="Recipe" onerror="this.src='{{ url_for('static', filename='images/no_images.jpg') }}'">
-                        <span class="calories-tag">{{ r.calories }} kcal</span>
-                    </div>
-
-                    <div class="card-content">
-                        <h3>{{ r.name }}</h3>
-                        <p class="ingredients-preview">{{ r.ingredients_simple | join(" • ") }}</p>
-
-                        <button class="toggle-btn" onclick="toggleDetails(this)">View Recipe</button>
-
-                        <div class="recipe-details">
-                            <hr>
-                            <h4>🛒 Ingredients</h4>
-                            <ul>
-                                {% for ing in r.ingredients_full %}
-                                <li>{{ ing }}</li>
-                                {% endfor %}
-                            </ul>
-                            <h4>👨‍🍳 Instructions</h4>
-                            <ol>
-                                {% for step in r.instructions %}
-                                <li>{{ step }}</li>
-                                {% endfor %}
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
+    <div class="nav-user-menu" onclick="toggleUserMenu()">
+      Hello, <strong>{{ username }}</strong>▼
     </div>
 
-    <script>
-        function toggleDetails(button) {
-            const details = button.nextElementSibling;
-            const isHidden = details.style.display === "none" || !details.style.display;
-            details.style.display = isHidden ? "block" : "none";
-            button.innerText = isHidden ? "Close Recipe" : "View Recipe";
-            button.classList.toggle('active');
-        }
+    <div id="userMenu" class="user-menu">
+      <a href="#" onclick="openEditUsername()">Edit Username</a>
+      <a href="#" onclick="openChangePassword()">Change Password</a>
+    </div>
 
-        function showLoading() {
-            document.querySelector('.upload-box').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-        }
-    </script>
-</body>
+    <a href="{{ url_for('logout') }}" class="btn-nav-logout">Logout</a>
 
-</html>
+  </div>
+</nav>
+
+<!-- ── FLASH MESSAGES ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+  {% for category, message in messages %}
+  <div class="flash flash--{{ category }}">
+    {% if category == 'success' %}✓{% elif category == 'error' %}⚠{% else %}ℹ{% endif %}
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="uh-page">
+
+  <!-- ══════════════════════════════
+       WELCOME BANNER
+  ══════════════════════════════ -->
+  <div class="uh-banner">
+    <div class="uh-banner__left">
+      <div class="uh-banner__greeting">Your Kitchen Dashboard</div>
+      <h1 class="uh-banner__title">
+        Welcome, <span>{{ username | title }}</span>
+      </h1>
+      <p class="uh-banner__sub">
+        Upload an ingredient photo and get personalised recipe recommendations instantly.
+      </p>
+    </div>
+    <div class="uh-banner__right">
+      <div class="uh-stat-pill">
+        <div class="uh-stat-pill__num">30+</div>
+        <div class="uh-stat-pill__label">Ingredients</div>
+      </div>
+      <div class="uh-stat-pill">
+        <div class="uh-stat-pill__num">5K+</div>
+        <div class="uh-stat-pill__label">Recipes</div>
+      </div>
+      <div class="uh-stat-pill">
+        <div class="uh-stat-pill__num">96%</div>
+        <div class="uh-stat-pill__label">Accuracte</div>
+      </div>
+    </div>
+    <div class="uh-history-center">
+      <a href="/history" class="uh-history-btn">Recipe History</a>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════
+       BODY — SIDEBAR + RECIPES
+  ══════════════════════════════ -->
+  <div class="uh-body">
+
+    <!-- ── LEFT PANEL ── -->
+    <aside class="uh-panel">
+
+      <!-- Upload form -->
+      <form method="POST" action="{{ url_for('userhome') }}" enctype="multipart/form-data" id="predictForm">
+
+        <!-- Upload zone -->
+        <div class="uh-panel__section-title">📸 Upload Ingredient</div>
+
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-zone__placeholder" id="uploadPlaceholder">
+            <span class="upload-zone__icon">📷</span>
+            <p class="upload-zone__text">Drop image here</p>
+            <p class="upload-zone__hint">or click to browse</p>
+          </div>
+          <img src="" alt="Preview" class="upload-zone__preview" id="previewImg" />
+          <input type="file" name="image" id="imageInput" class="upload-zone__input" accept="image/*" required />
+        </div>
+        <div class="upload-zone__filename" id="filenameDisplay"></div>
+
+        <!-- Calorie input -->
+        <div style="margin-top: 1.4rem;">
+          <div class="uh-panel__section-title">Calorie Limit (optional)</div>
+          <div class="calorie-group">
+            <div class="calorie-row">
+              <input type="number" name="calories" id="calorieInput" class="calorie-input" placeholder="e.g. 500"
+                min="50" max="5000" step="10" value="{{ calorie_limit | int if calorie_limit else '' }}" />
+              <span class="calorie-unit">kcal</span>
+            </div>
+            <p class="calorie-note">Leave blank to show all calorie ranges</p>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit-predict" id="btnPredict" style="margin-top: 1.2rem;">
+          <span id="btnText"> Analyse &amp; Get Recipes</span>
+          <span id="btnLoading" style="display:none;"> Analysing…</span>
+        </button>
+
+      </form>
+
+      <!-- ── Prediction result (shown after POST) ── -->
+      {% if prediction %}
+      <div class="pred-result">
+        {% if image_path %}
+        <img src="{{ url_for('static', filename=image_path) }}" alt="{{ prediction }}" class="pred-result__img"
+          onerror="this.style.display='none'" />
+        {% endif %}
+        <div class="pred-result__ingredient">{{ prediction | title }}</div>
+
+      </div>
+      {% endif %}
+    </aside>
+
+    <!-- ── RIGHT — RECIPES PANEL ── -->
+    <div class="uh-recipes">
+
+      {% if not prediction %}
+      <!-- Welcome / empty state -->
+      <div class="uh-welcome">
+        <div class="uh-welcome__emojis">
+          <span>🥕</span><span>🍅</span><span>🥦</span><span>🍋</span>
+        </div>
+        <h2 class="uh-welcome__title">Ready to Cook?</h2>
+        <p class="uh-welcome__desc">
+          Upload a photo of any fruit or vegetable on the left. Our AI will identify it and suggest the best matching
+          recipes — filtered to your calorie goal if you set one.
+        </p>
+        <div class="uh-welcome__tags">
+          {% for veg in ['Carrot','Tomato','Spinach','Apple','Banana','Broccoli','Bell
+          Pepper','Onion','Potato','Cucumber'] %}
+          <span class="uh-tag">{{ veg }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% elif recipes %}
+      <!-- Recipe results -->
+      <div class="recipes-header">
+        <div class="recipes-header__left">
+          <div class="recipes-header__kicker">
+            Recipes for {{ prediction | title }}
+          </div>
+          <h2 class="recipes-header__title">
+            TOP <em>Recipes</em>
+          </h2>
+          <p class="recipes-header__count" id="recipeCount">
+            Showing <strong id="shownCount">8</strong> of
+            <strong>{{ total_recipes }}</strong> matches
+          </p>
+        </div>
+        {% if calorie_limit %}
+        <div class="recipes-header__filter">
+          🔥 Max {{ calorie_limit | int }} kcal
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Recipe Cards Grid -->
+      <!-- All recipes passed; JS hides beyond 5, load-more reveals batches -->
+      <div class="recipe-grid" id="recipeGrid">
+        {% for r in recipes %}
+        <div class="recipe-card {% if loop.index > 5 %}hidden{% endif %}" data-index="{{ loop.index0 }}">
+
+          <!-- Thumbnail -->
+          <div class="recipe-card__thumb">
+            {% if r.image %}
+            <img src="{{ r.image }}" alt="{{ r.name }}" class="recipe-card__img"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="recipe-card__no-img" style="display:none;">🍽️</div>
+            {% else %}
+            <div class="recipe-card__no-img">🍽️</div>
+            {% endif %}
+            {% if r.calories %}
+            <span class="recipe-card__cal-badge">🔥 {{ r.calories | int }} kcal</span>
+            {% endif %}
+          </div>
+
+          <!-- Body -->
+          <div class="recipe-card__body">
+            <div class="recipe-card__name">{{ r.name }}</div>
+            <div class="recipe-card__ingredients">
+              {{ r.ingredients_simple | join(', ') if r.ingredients_simple else 'No ingredients listed' }}
+            </div>
+            <div class="recipe-card__footer">
+              <button class="btn-show-more" onclick="openModal({{ loop.index0 }})">
+                Show More
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Load more button -->
+      {% if total_recipes > 8 %}
+      <div class="load-more-row">
+        <button class="btn-load-more" id="btnLoadMore" onclick="loadMore()">
+          Show More Recipes
+          <span id="loadMoreCount">({{ [total_recipes - 8, 0] | max }} more)</span>
+        </button>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <!-- No results after calorie filter -->
+      <div class="no-results">
+        <div class="no-results__icon">🔍</div>
+        <h3 class="no-results__title">No Recipes Found</h3>
+        <p class="no-results__desc">
+          No recipes match
+          {% if calorie_limit %}a calorie limit of <strong>{{ calorie_limit | int }} kcal</strong> for{% endif %}
+          <strong>{{ prediction | title }}</strong>.
+          Try increasing your calorie limit or removing the filter.
+        </p>
+      </div>
+      {% endif %}
+
+    </div><!-- /uh-recipes -->
+
+  </div><!-- /uh-body -->
+
+</div><!-- /uh-page -->
+
+
+<!-- ══════════════════════════════
+     RECIPE MODALS
+     One per recipe, opened by JS
+══════════════════════════════ -->
+{% if recipes %}
+{% for r in recipes %}
+<div class="modal-overlay" id="modal{{ loop.index0 }}" onclick="closeModalClick(event, this)">
+  <div class="modal-box">
+
+    <!-- Header -->
+    <div class="modal-header">
+      {% if r.image %}
+      <img src="{{ r.image }}" alt="{{ r.name }}" class="modal-header__img" onerror="this.style.display='none'" />
+      {% endif %}
+      <div class="modal-header__overlay"></div>
+      <div class="modal-header__content">
+        <h2 class="modal-header__title">{{ r.name }}</h2>
+        {% if r.calories %}
+        <span class="modal-header__cal">🔥 {{ r.calories | int }} kcal</span>
+        {% endif %}
+      </div>
+      <button class="modal-close" onclick="closeModal('modal{{ loop.index0 }}')">✕</button>
+    </div>
+
+    <!-- Body — two columns -->
+    <div class="modal-body">
+
+      <!-- LEFT: Ingredients -->
+      <div class="modal-col">
+        <div class="modal-col__title">🥬 Ingredients with Quantity</div>
+        {% if r.ingredients_full %}
+        <div class="ingr-tags">
+          {% for item in r.ingredients_full %}
+          <span class="ingr-tag">{{ item }}</span>
+          {% endfor %}
+        </div>
+        {% elif r.ingredients_simple %}
+        <div class="ingr-tags">
+          {% for item in r.ingredients_simple %}
+          <span class="ingr-tag">{{ item }}</span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="modal-none">No ingredient details available.</p>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: Instructions -->
+      <div class="modal-col">
+        <div class="modal-col__title">📋 Instructions</div>
+        {% if r.instructions %}
+        <div class="instr-list">
+          {% for step in r.instructions %}
+          <div class="instr-step">
+            <span class="instr-step__num">{{ loop.index }}</span>
+            <p class="instr-step__text">{{ step }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="modal-none">No instructions available.</p>
+        {% endif %}
+      </div>
+<div id="editUsernameModal" class="profile-modal">
+
+  <div class="profile-modal__card">
+
+    <div class="profile-modal__title">
+      Edit profile
+    </div>
+
+    <div class="profile-avatar">
+      <div class="profile-avatar__circle">
+        {{ username[:2]|upper }}
+      </div>
+    </div>
+
+    <form action="/update_username" method="POST">
+
+      <div class="profile-field">
+        <label>Username</label>
+        <input type="text" name="new_username" value="{{ username }}" required>
+      </div>
+
+      <div class="profile-buttons">
+        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+        <button type="submit" class="btn-save">Save</button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+<div id="changePasswordModal" class="profile-modal">
+
+  <div class="profile-modal__card">
+
+    <div class="profile-modal__title">
+      Change Password
+    </div>
+
+    <form action="/change_password" method="POST">
+
+      <div class="profile-field">
+        <label>Current Password</label>
+        <input type="password" name="current_password" required>
+      </div>
+
+      <div class="profile-field">
+        <label>New Password</label>
+        <input type="password" name="new_password" required>
+      </div>
+
+      <div class="profile-field">
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" required>
+      </div>
+
+      <div class="profile-buttons">
+        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+        <button type="submit" class="btn-save">Update</button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+    </div><!-- /modal-body -->
+
+  </div><!-- /modal-box -->
+</div><!-- /modal-overlay -->
+{% endfor %}
+{% endif %}
+<!-- USER PROFILE MODALS (MOVE HERE) -->
+
+<div id="editUsernameModal" class="profile-modal">
+  <div class="profile-modal__card">
+
+    <div class="profile-modal__title">Edit profile</div>
+
+    <div class="profile-avatar">
+      <div class="profile-avatar__circle">
+        {{ username[:2]|upper }}
+      </div>
+    </div>
+
+    <form action="/update_username" method="POST">
+      <div class="profile-field">
+        <label>Username</label>
+        <input type="text" name="new_username" value="{{ username }}" required>
+      </div>
+
+      <div class="profile-buttons">
+        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+        <button type="submit" class="btn-save">Save</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+
+<div id="changePasswordModal" class="profile-modal">
+  <div class="profile-modal__card">
+
+    <div class="profile-modal__title">Change Password</div>
+
+    <form action="/change_password" method="POST">
+
+      <div class="profile-field">
+        <label>Current Password</label>
+        <input type="password" name="current_password" required>
+      </div>
+
+      <div class="profile-field">
+        <label>New Password</label>
+        <input type="password" name="new_password" required>
+      </div>
+
+      <div class="profile-field">
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" required>
+      </div>
+
+      <div class="profile-buttons">
+        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+        <button type="submit" class="btn-save">Update</button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PAGE SCRIPTS
+══════════════════════════════ -->
+<script>
+  function toggleUserMenu() {
+    let menu = document.getElementById("userMenu");
+
+    if (menu.style.display === "block") {
+      menu.style.display = "none";
+    } else {
+      menu.style.display = "block";
+    }
+  }
+  /* ─────────────────────────────
+     Upload zone — preview + filename
+  ───────────────────────────── */
+  const uploadZone = document.getElementById('uploadZone');
+  const imageInput = document.getElementById('imageInput');
+  const previewImg = document.getElementById('previewImg');
+  const uploadPlaceholdr = document.getElementById('uploadPlaceholder');
+  const filenameDisplay = document.getElementById('filenameDisplay');
+
+  uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) { imageInput.files = e.dataTransfer.files; showPreview(file); }
+  });
+
+  imageInput.addEventListener('change', () => {
+    if (imageInput.files[0]) showPreview(imageInput.files[0]);
+  });
+
+  function showPreview(file) {
+    const url = URL.createObjectURL(file);
+    previewImg.src = url;
+    previewImg.style.display = 'block';
+    uploadPlaceholdr.style.display = 'none';
+    filenameDisplay.textContent = file.name;
+  }
+
+  /* ─────────────────────────────
+     Submit — loading state
+  ───────────────────────────── */
+  document.getElementById('predictForm').addEventListener('submit', function () {
+    if (!imageInput.files.length) return;
+    document.getElementById('btnText').style.display = 'none';
+    document.getElementById('btnLoading').style.display = 'inline';
+    document.getElementById('btnPredict').disabled = true;
+  });
+
+  /* ─────────────────────────────
+     Load More Recipes
+  ───────────────────────────── */
+  let shown = Math.min(8, {{ total_recipes }});
+  const total = {{ total_recipes }};
+  const BATCH = 5;
+
+  function loadMore() {
+    const cards = document.querySelectorAll('.recipe-card.hidden');
+    const toShow = Array.from(cards).slice(0, BATCH);
+    toShow.forEach(c => c.classList.remove('hidden'));
+
+    shown += toShow.length;
+    document.getElementById('shownCount').textContent = shown;
+
+    const remaining = total - shown;
+    if (remaining <= 0) {
+      document.getElementById('btnLoadMore').classList.add('hidden');
+    } else {
+      document.getElementById('loadMoreCount').textContent =
+        '(' + remaining + ' more)';
+    }
+  }
+
+  /* ─────────────────────────────
+     Modal open / close
+  ───────────────────────────── */
+  function openModal(idx) {
+    const m = document.getElementById('modal' + idx);
+    if (m) {
+      m.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) {
+      m.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function closeModalClick(e, overlay) {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => {
+        m.classList.remove('open');
+      });
+      document.body.style.overflow = '';
+    }
+  });
+ function toggleUserMenu() {
+    let menu = document.getElementById("userMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  function openEditUsername() {
+    document.getElementById("editUsernameModal").style.display = "flex";
+    document.getElementById("userMenu").style.display = "none";
+  }
+
+  function openChangePassword() {
+    document.getElementById("changePasswordModal").style.display = "flex";
+    document.getElementById("userMenu").style.display = "none";
+  }
+
+  function closeModals() {
+    document.getElementById("editUsernameModal").style.display = "none";
+    document.getElementById("changePasswordModal").style.display = "none";
+  }
+
+  /* ─────────────────────────────
+     Auto-dismiss flash messages
+  ───────────────────────────── */
+  setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(f => f.remove());
+  }, 5000);
+</script>
+
+{% endblock %}
