@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/userhome.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
 {% block body %}
@@ -94,8 +95,12 @@
       <form method="POST" action="{{ url_for('userhome') }}" enctype="multipart/form-data" id="predictForm">
 
         <!-- Upload zone -->
-        <div class="uh-panel__section-title">📸 Upload Ingredient</div>
-
+<div class="uh-panel__section-title">
+  <span>📸 Upload Ingredient</span>
+  <a href="{{ url_for('userhome') }}" class="refresh-btn">
+    <i class="fa-solid fa-rotate-right"></i>
+  </a>
+</div>
         <div class="upload-zone" id="uploadZone">
           <div class="upload-zone__placeholder" id="uploadPlaceholder">
             <span class="upload-zone__icon">📷</span>
@@ -103,7 +108,7 @@
             <p class="upload-zone__hint">or click to browse</p>
           </div>
           <img src="" alt="Preview" class="upload-zone__preview" id="previewImg" />
-          <input type="file" name="image" id="imageInput" class="upload-zone__input" accept="image/*" required />
+          <input type="file" name="image" id="imageInput" class="upload-zone__input" accept="image/*" multiple required />
         </div>
         <div class="upload-zone__filename" id="filenameDisplay"></div>
 
@@ -129,16 +134,29 @@
       </form>
 
       <!-- ── Prediction result (shown after POST) ── -->
-      {% if prediction %}
-      <div class="pred-result">
-        {% if image_path %}
-        <img src="{{ url_for('static', filename=image_path) }}" alt="{{ prediction }}" class="pred-result__img"
-          onerror="this.style.display='none'" />
-        {% endif %}
-        <div class="pred-result__ingredient">{{ prediction | title }}</div>
-
+    {% if predictions %}
+    <div class="pred-result">
+    
+      <div class="pred-result__label">Detected Ingredients</div>
+    
+      <div class="pred-images">
+    
+        {% for p in predictions %}
+        <div class="pred-item">
+    
+          <img src="{{ url_for('static', filename=p.image) }}" class="pred-img" />
+    
+          <div class="pred-name">
+            {{ p.name | title }}
+          </div>
+    
+        </div>
+        {% endfor %}
+    
       </div>
-      {% endif %}
+    
+    </div>
+    {% endif %}
     </aside>
 
     <!-- ── RIGHT — RECIPES PANEL ── -->
@@ -212,6 +230,10 @@
               {{ r.ingredients_simple | join(', ') if r.ingredients_simple else 'No ingredients listed' }}
             </div>
             <div class="recipe-card__footer">
+                <!-- SAVE BUTTON -->
+                <button class="btn-save" onclick='saveRecipe({{ r | tojson | safe }}, {{ predictions | tojson | safe }})'>
+                  💾Save
+                </button>
               <button class="btn-show-more" onclick="openModal({{ loop.index0 }})">
                 Show More
               </button>
@@ -315,79 +337,14 @@
         <p class="modal-none">No instructions available.</p>
         {% endif %}
       </div>
-<div id="editUsernameModal" class="profile-modal">
 
-  <div class="profile-modal__card">
-
-    <div class="profile-modal__title">
-      Edit profile
-    </div>
-
-    <div class="profile-avatar">
-      <div class="profile-avatar__circle">
-        {{ username[:2]|upper }}
-      </div>
-    </div>
-
-    <form action="/update_username" method="POST">
-
-      <div class="profile-field">
-        <label>Username</label>
-        <input type="text" name="new_username" value="{{ username }}" required>
-      </div>
-
-      <div class="profile-buttons">
-        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
-        <button type="submit" class="btn-save">Save</button>
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
-<div id="changePasswordModal" class="profile-modal">
-
-  <div class="profile-modal__card">
-
-    <div class="profile-modal__title">
-      Change Password
-    </div>
-
-    <form action="/change_password" method="POST">
-
-      <div class="profile-field">
-        <label>Current Password</label>
-        <input type="password" name="current_password" required>
-      </div>
-
-      <div class="profile-field">
-        <label>New Password</label>
-        <input type="password" name="new_password" required>
-      </div>
-
-      <div class="profile-field">
-        <label>Confirm Password</label>
-        <input type="password" name="confirm_password" required>
-      </div>
-
-      <div class="profile-buttons">
-        <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
-        <button type="submit" class="btn-save">Update</button>
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
     </div><!-- /modal-body -->
 
   </div><!-- /modal-box -->
 </div><!-- /modal-overlay -->
 {% endfor %}
 {% endif %}
-<!-- USER PROFILE MODALS (MOVE HERE) -->
+<!-- USER PROFILE MODALS -->
 
 <div id="editUsernameModal" class="profile-modal">
   <div class="profile-modal__card">
@@ -452,6 +409,32 @@
      PAGE SCRIPTS
 ══════════════════════════════ -->
 <script>
+  function saveRecipe(recipe, predictions) {
+
+      fetch("/save_recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: recipe.name,
+          image: recipe.image,
+          calories: recipe.calories,
+          ingredients: recipe.ingredients_full || recipe.ingredients_simple,
+          instructions: recipe.instructions,
+          predicted: predictions.map(p => p.name)
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            alert("Recipe saved successfully!");
+          } else {
+            alert("Error saving recipe");
+          }
+        })
+        .catch(() => alert("Server error"));
+    }
   function toggleUserMenu() {
     let menu = document.getElementById("userMenu");
 
@@ -582,6 +565,22 @@
     document.getElementById("changePasswordModal").style.display = "none";
   }
 
+  imageInput.addEventListener('change', () => {
+
+    filenameDisplay.innerHTML = "";
+
+    for (let i = 0; i < imageInput.files.length; i++) {
+
+      let file = imageInput.files[i];
+
+      let div = document.createElement("div");
+      div.innerText = file.name;
+
+      filenameDisplay.appendChild(div);
+
+    }
+
+  });
   /* ─────────────────────────────
      Auto-dismiss flash messages
   ───────────────────────────── */

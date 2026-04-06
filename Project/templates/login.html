@@ -118,8 +118,24 @@
                     Don't have an account?
                     <a onclick="switchTab('signup')">Create one free</a>
                 </div>
+                <div class="forgot-link">
+                    <a onclick="openForgotModal()">Forgot Password?</a>
+                </div>
             </form>
-
+            <!-- Forgot Password Modal -->
+            <div id="forgotModal" class="modal-overlay">
+                <div class="modal-box">
+            
+                    <h3>Reset Password</h3>
+            
+                    <form method="POST" action="/forgot_password">
+                            <input type="email" name="email" placeholder="Enter your email" required>
+                        <button type="submit"> Send Reset Link </button>
+                    </form>
+                    <button class="cancelbtn" onclick="closeForgotModal()">Cancel</button>
+            
+                </div>
+            </div>
             <!-- ── SIGNUP FORM ── -->
             <form class="auth-form {% if tab == 'signup' %}active{% endif %}" id="formSignup" method="POST"
                 action="{{ url_for('signup') }}" novalidate>
@@ -174,6 +190,7 @@
                     Already have an account?
                     <a onclick="switchTab('login')">Sign in</a>
                 </div>
+                
             </form>
 
         </div><!-- /auth-card -->
@@ -182,6 +199,15 @@
 </div><!-- /auth-page -->
 
 <script>
+    function openForgotModal() {
+            document.getElementById("forgotModal").classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+    function closeForgotModal() {
+            document.getElementById("forgotModal").classList.remove("open");
+            document.body.style.overflow = "";
+        }
     /* ── Tab switcher ── */
     function switchTab(tab) {
         const isLogin = tab === 'login';
@@ -248,6 +274,7 @@
             if (err) err.classList.remove('visible');
         });
     });
+    
 </script>
 
 {% endblock %}

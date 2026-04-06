@@ -66,6 +66,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    text-decoration: none;
 }
 
 .auth-visual__logo {
@@ -462,6 +463,26 @@
     color: var(--white);
 }
 
+/* ── FORGOT LINK ── */
+.forgot-link {
+    text-align: center;
+    font-size: 0.78rem;
+
+    color: var(--muted);
+    margin-top: 1.4rem;
+}
+
+.forgot-link a {
+    color: var(--lime);
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.forgot-link a:hover {
+    color: var(--white);
+}
 /* ════════════════════
    RESPONSIVE
 ════════════════════ */
@@ -479,4 +500,78 @@
         padding: 2.5rem 1.5rem;
         justify-content: center;
     }
+}
+.modal-overlay {
+    display: none;
+    /* HIDDEN BY DEFAULT */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.7);
+    /* dark overlay */
+    backdrop-filter: blur(5px);
+
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-overlay.open {
+    display: flex;
+    /* SHOW WHEN OPEN */
+}
+
+/* Modal Box */
+.modal-box {
+    background: #121a13;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    animation: popup 0.3s ease;
+}
+.modal-box h3 {
+    color: #4caf78;
+    margin-bottom: 1rem;
+}
+
+.modal-box input {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border: 1px solid #2a3a2f;
+    background: #1c2a1e;
+    color: white;
+}
+
+.modal-box button {
+    width: 100%;
+    padding: 0.6rem;
+    background: #4caf78;
+    border: none;
+    border-radius: 6px;
+    color: #0d1a0f;
+    font-weight: bold;
+}
+/* Animation */
+@keyframes popup {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+.cancelbtn{
+    margin-top: 0.5rem;
+    background: #e05252;
 }

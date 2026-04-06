@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Recipe History — Snap2Cook{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/userhome.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/historycss.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block body %}
+
+<!-- ── NAV (matches userhome exactly) ── -->
+<nav class="nav">
+    <a href="{{ url_for('home') }}" class="nav__brand">
+        <div class="nav__logo">🍳</div>
+        <span class="nav__wordmark">Snap2Cook</span>
+    </a>
+    <ul class="nav__links">
+        <li><a href="{{ url_for('userhome') }}">My Kitchen</a></li>
+        <li><a href="{{ url_for('history') }}" >History</a></li>
+    </ul>
+    <div class="nav__right">
+        <div class="nav-user-menu" onclick="toggleUserMenu()">
+            Hello, <strong>{{ username }}</strong> ▼
+        </div>
+        <div id="userMenu" class="user-menu">
+            <a href="#" onclick="openEditUsername()">Edit Username</a>
+            <a href="#" onclick="openChangePassword()">Change Password</a>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-nav-logout">Logout</a>
+    </div>
+</nav>
+
+── FLASH MESSAGES ──
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash flash--{{ category }}">
+        {% if category == 'success' %}✓{% elif category == 'error' %}⚠{% else %}ℹ{% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="hist-page">
+
+    <!-- ══ BANNER ══ -->
+    <div class="hist-banner">
+        <div class="hist-banner__left">
+            <div class="hist-banner__kicker">📚 Your Culinary Journey</div>
+            <h1 class="hist-banner__title">Recipe <span>History</span></h1>
+            <p class="hist-banner__sub">All recipes you've saved from your ingredient scans</p>
+        </div>
+        <div class="hist-banner__stats">
+            <div class="hist-stat">
+                <div class="hist-stat__num">{{ recipes | length }}</div>
+                <div class="hist-stat__label">Saved</div>
+            </div>
+            <div class="hist-stat">
+                <div class="hist-stat__num">
+                    {{ recipes | map(attribute='predicted_ingredient') | select | list | unique | list | length }}
+                </div>
+                <div class="hist-stat__label">Ingredients</div>
+            </div>
+            <div class="hist-stat">
+                <div class="hist-stat__num">
+                    {% set cals = recipes | selectattr('calories') | map(attribute='calories') | list %}
+                    {% if cals %}{{ (cals | sum / cals | length) | int }}{% else %}—{% endif %}
+                </div>
+                <div class="hist-stat__label">Avg kcal</div>
+            </div>
+        </div>
+    </div>
+
+    {% if recipes %}
+
+    <!-- ══ TOOLBAR ══ -->
+    <div class="hist-toolbar">
+
+        <!-- Search -->
+        <div class="hist-search">
+            <i class="fa-solid fa-magnifying-glass hist-search__icon"></i>
+            <input type="text" class="hist-search__input" id="searchInput"
+                placeholder="Search by recipe name or ingredient…" oninput="filterCards()" />
+        </div>
+
+        <!-- Sort -->
+        <div class="hist-filter">
+            <select id="sortSelect" onchange="sortCards()">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name_az">Name A–Z</option>
+                <option value="name_za">Name Z–A</option>
+                <option value="cal_asc">Calories ↑</option>
+                <option value="cal_desc">Calories ↓</option>
+            </select>
+        </div>
+
+        <!-- View toggle -->
+        <div class="view-toggle">
+            <button class="btn-view active" id="btnGrid" onclick="setView('grid')" title="Grid view">
+                <i class="fa-solid fa-grip"></i>
+            </button>
+            <button class="btn-view" id="btnList" onclick="setView('list')" title="List view">
+                <i class="fa-solid fa-list"></i>
+            </button>
+        </div>
+
+        <!-- Clear All -->
+        <button class="btn-clear-all" onclick="openClearConfirm()">
+            <i class="fa-solid fa-trash-can"></i> Clear All
+        </button>
+
+    </div>
+
+    <!-- Results meta -->
+    <div class="hist-meta" id="histMeta">
+        Showing <strong id="shownCount">{{ recipes | length }}</strong>
+        of <strong>{{ recipes | length }}</strong> saved recipes
+    </div>
+
+    <!-- No search results -->
+    <div class="hist-no-results" id="noSearchResults">
+        <p>🔍 No recipes match your search. Try a different keyword.</p>
+    </div>
+
+    <!-- ══ RECIPE GRID ══ -->
+    <div class="recipe-grid" id="recipeGrid">
+
+        {% for r in recipes %}
+        <div class="recipe-card" data-id="{{ r.id }}" data-name="{{ r.recipe_name | lower }}"
+            data-ingredient="{{ r.predicted_ingredient | lower if r.predicted_ingredient else '' }}"
+            data-calories="{{ r.calories if r.calories else 0 }}"
+            data-date="{{ r.saved_at.isoformat() if r.saved_at else '' }}"
+            style="animation-delay: {{ loop.index0 * 0.05 }}s">
+
+            <!-- Delete btn (top right, appears on hover) -->
+            <button class="btn-delete-card" onclick="openDeleteConfirm({{ r.id }}, '{{ r.recipe_name | e }}')"
+                title="Delete recipe">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Date badge (top left) -->
+            {% if r.saved_at %}
+            <div class="recipe-card__date">
+                {{ r.saved_at.strftime('%d %b %Y') }}
+            </div>
+            {% endif %}
+
+            <!-- Thumbnail -->
+            <div class="recipe-card__thumb">
+                {% if r.recipe_image %}
+                <img src="{{ r.recipe_image }}" alt="{{ r.recipe_name }}" class="recipe-card__img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="recipe-card__no-img" style="display:none;">🍽️</div>
+                {% else %}
+                <div class="recipe-card__no-img">🍽️</div>
+                {% endif %}
+                {% if r.calories %}
+                <span class="recipe-card__cal-badge">🔥 {{ r.calories | int }} kcal</span>
+                {% endif %}
+            </div>
+
+            <!-- Body -->
+            <div class="recipe-card__body">
+
+                {% if r.predicted_ingredient %}
+                <div class="recipe-card__predicted">
+                    🥦 {{ r.predicted_ingredient | title }}
+                </div>
+                {% endif %}
+
+                <div class="recipe-card__name">{{ r.recipe_name }}</div>
+
+                <div class="recipe-card__ingredients">
+                    {{ r.ingredients[:3] | join(', ') }}{% if r.ingredients | length > 3 %}…{% endif %}
+                </div>
+
+                <div class="recipe-card__footer">
+                    <button class="btn-show-more" onclick="openModal('hmodal{{ loop.index0 }}')">
+                        Show More
+                    </button>
+                    <button class="btn-delete-inline" onclick="openDeleteConfirm({{ r.id }}, '{{ r.recipe_name | e }}')"
+                        style="
+                    background:rgba(235,87,87,.08);border:1px solid rgba(235,87,87,.25);
+                    border-radius:6px;color:#eb5757;font-size:.78rem;font-weight:500;
+                    padding:.28rem .7rem;cursor:pointer;transition:all .2s;font-family:inherit;
+                  ">
+                        <i class="fa-solid fa-trash-can" style="font-size:.72rem"></i> Delete
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── MODAL for this recipe ── -->
+        <div class="modal-overlay" id="hmodal{{ loop.index0 }}" onclick="closeModalClick(event, this)">
+            <div class="modal-box">
+
+                <!-- Modal header with image -->
+                <div class="modal-header">
+                    {% if r.recipe_image %}
+                    <img src="{{ r.recipe_image }}" alt="{{ r.recipe_name }}" class="modal-header__img"
+                        onerror="this.style.display='none'">
+                    {% endif %}
+                    <div class="modal-header__overlay"></div>
+                    <div class="modal-header__content">
+                        <h2 class="modal-header__title">{{ r.recipe_name }}</h2>
+                        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem">
+                            {% if r.calories %}
+                            <span class="recipe-card__cal-badge" style="position:static;display:inline-flex">
+                                🔥 {{ r.calories | int }} kcal
+                            </span>
+                            {% endif %}
+                            {% if r.predicted_ingredient %}
+                            <span style="
+                background:rgba(76,175,120,.15);border:1px solid rgba(76,175,120,.3);
+                color:#4caf78;padding:.18rem .6rem;border-radius:5px;
+                font-size:.72rem;font-weight:600;
+              ">🥦 {{ r.predicted_ingredient | title }}</span>
+                            {% endif %}
+                            {% if r.saved_at %}
+                            <span style="
+                background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+                color:rgba(255,255,255,.5);padding:.18rem .6rem;border-radius:5px;font-size:.72rem;
+              ">🕐 {{ r.saved_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal('hmodal{{ loop.index0 }}')">✕</button>
+                </div>
+
+                <!-- Modal body — two columns -->
+                <div class="modal-body">
+
+                    <!-- Ingredients with quantity -->
+                    <div class="modal-col">
+                        <div class="modal-col__title">🧂 Ingredients</div>
+                        {% if r.ingredients %}
+                        <div class="ingr-tags">
+                            {% for item in r.ingredients %}
+                            <span class="ingr-tag">{{ item }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="modal-none">No ingredient details available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="modal-col">
+                        <div class="modal-col__title">📋 Instructions</div>
+                        {% if r.instructions %}
+                        <div class="instr-list">
+                            {% for step in r.instructions %}
+                            <div class="instr-step">
+                                <span class="instr-step__num">{{ loop.index }}</span>
+                                <p class="instr-step__text">{{ step }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="modal-none">No instructions available.</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- /modal -->
+
+        {% endfor %}
+    </div><!-- /recipe-grid -->
+
+    {% else %}
+    <!-- ── EMPTY STATE ── -->
+    <div class="hist-empty">
+        <div class="hist-empty__icon">📭</div>
+        <div class="hist-empty__title">No saved recipes yet</div>
+        <div class="hist-empty__desc">
+            Go to My Kitchen, upload an ingredient photo and save recipes you love — they'll appear here.
+        </div>
+        <a href="{{ url_for('userhome') }}" class="btn-go-cook">Start Cooking →</a>
+    </div>
+    {% endif %}
+
+</div><!-- /hist-page -->
+
+
+<!-- ══ DELETE SINGLE CONFIRM MODAL ══ -->
+<div class="confirm-overlay" id="deleteConfirmOverlay">
+    <div class="confirm-box">
+        <div class="confirm-box__icon">🗑️</div>
+        <div class="confirm-box__title">Delete Recipe?</div>
+        <div class="confirm-box__desc">
+            Are you sure you want to delete <strong id="deleteRecipeName" style="color:#e8ede9"></strong>?
+            This cannot be undone.
+        </div>
+        <div class="confirm-box__btns">
+            <button class="btn-cancel-confirm" onclick="closeConfirm()">Cancel</button>
+            <form id="deleteForm" method="POST" style="flex:1">
+                <button type="submit" class="btn-confirm-del" style="width:100%">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══ CLEAR ALL CONFIRM MODAL ══ -->
+<div class="confirm-overlay" id="clearConfirmOverlay">
+    <div class="confirm-box clear-box">
+        <div class="confirm-box__icon">⚠️</div>
+        <div class="confirm-box__title">Clear All History?</div>
+        <div class="confirm-box__desc">
+            This will permanently delete all <strong style="color:#e8ede9">{{ recipes | length }} saved recipes</strong>
+            from your history. This action <strong style="color:#eb5757">cannot be undone</strong>.
+        </div>
+        <div class="confirm-box__btns">
+            <button class="btn-cancel-confirm" onclick="closeClearConfirm()">Cancel</button>
+            <form action="{{ url_for('clear_history') }}" method="POST" style="flex:1">
+                <button type="submit" class="btn-confirm-del" style="width:100%">Clear All</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══ PROFILE MODALS (same as userhome) ══ -->
+<div id="editUsernameModal" class="profile-modal">
+    <div class="profile-modal__card">
+        <div class="profile-modal__title">Edit Profile</div>
+        <div class="profile-avatar">
+            <div class="profile-avatar__circle">{{ username[:2] | upper }}</div>
+        </div>
+        <form action="/update_username" method="POST">
+            <div class="profile-field">
+                <label>Username</label>
+                <input type="text" name="new_username" value="{{ username }}" required>
+            </div>
+            <div class="profile-buttons">
+                <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="changePasswordModal" class="profile-modal">
+    <div class="profile-modal__card">
+        <div class="profile-modal__title">Change Password</div>
+        <form action="/change_password" method="POST">
+            <div class="profile-field">
+                <label>Current Password</label>
+                <input type="password" name="current_password" required>
+            </div>
+            <div class="profile-field">
+                <label>New Password</label>
+                <input type="password" name="new_password" required>
+            </div>
+            <div class="profile-field">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" required>
+            </div>
+            <div class="profile-buttons">
+                <button type="button" onclick="closeModals()" class="btn-cancel">Cancel</button>
+                <button type="submit" class="btn-save">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+    /* ── Card data for JS filtering/sorting ── */
+    const allCards = Array.from(document.querySelectorAll('.recipe-card'));
+
+    /* ── SEARCH FILTER ── */
+    function filterCards() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        let visible = 0;
+
+        allCards.forEach(card => {
+            const name = card.dataset.name || '';
+            const ing = card.dataset.ingredient || '';
+            const match = !q || name.includes(q) || ing.includes(q);
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        document.getElementById('shownCount').textContent = visible;
+        document.getElementById('noSearchResults').classList.toggle('visible', visible === 0 && q !== '');
+    }
+
+    /* ── SORT ── */
+    function sortCards() {
+        const mode = document.getElementById('sortSelect').value;
+        const grid = document.getElementById('recipeGrid');
+
+        const sorted = [...allCards].sort((a, b) => {
+            if (mode === 'newest') return new Date(b.dataset.date) - new Date(a.dataset.date);
+            if (mode === 'oldest') return new Date(a.dataset.date) - new Date(b.dataset.date);
+            if (mode === 'name_az') return a.dataset.name.localeCompare(b.dataset.name);
+            if (mode === 'name_za') return b.dataset.name.localeCompare(a.dataset.name);
+            if (mode === 'cal_asc') return parseFloat(a.dataset.calories) - parseFloat(b.dataset.calories);
+            if (mode === 'cal_desc') return parseFloat(b.dataset.calories) - parseFloat(a.dataset.calories);
+            return 0;
+        });
+
+        sorted.forEach(c => grid.appendChild(c));
+    }
+
+    /* ── VIEW TOGGLE ── */
+    function setView(v) {
+        const grid = document.getElementById('recipeGrid');
+        grid.classList.toggle('list-view', v === 'list');
+        document.getElementById('btnGrid').classList.toggle('active', v === 'grid');
+        document.getElementById('btnList').classList.toggle('active', v === 'list');
+    }
+
+    /* ── DELETE SINGLE ── */
+    let pendingDeleteId = null;
+
+    function openDeleteConfirm(id, name) {
+        pendingDeleteId = id;
+        document.getElementById('deleteRecipeName').textContent = '"' + name + '"';
+        document.getElementById('deleteForm').action = '/history/delete/' + id;
+        document.getElementById('deleteConfirmOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeConfirm() {
+        document.getElementById('deleteConfirmOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    /* ── CLEAR ALL ── */
+    function openClearConfirm() {
+        document.getElementById('clearConfirmOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeClearConfirm() {
+        document.getElementById('clearConfirmOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    /* ── RECIPE MODALS ── */
+    function openModal(id) {
+        const m = document.getElementById(id);
+        if (m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        if (m) { m.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+    function closeModalClick(e, overlay) {
+        if (e.target === overlay) { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+
+    /* ── ESCAPE KEY ── */
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        document.querySelectorAll('.modal-overlay.open, .confirm-overlay.open').forEach(m => {
+            m.classList.remove('open');
+        });
+        document.body.style.overflow = '';
+    });
+
+    /* ── NAV USER MENU ── */
+    function toggleUserMenu() {
+        const m = document.getElementById('userMenu');
+        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+    }
+    function openEditUsername() {
+        document.getElementById('editUsernameModal').style.display = 'flex';
+        document.getElementById('userMenu').style.display = 'none';
+    }
+    function openChangePassword() {
+        document.getElementById('changePasswordModal').style.display = 'flex';
+        document.getElementById('userMenu').style.display = 'none';
+    }
+    function closeModals() {
+        document.getElementById('editUsernameModal').style.display = 'none';
+        document.getElementById('changePasswordModal').style.display = 'none';
+    }
+
+    /* ── AUTO-DISMISS FLASH ── */
+    setTimeout(() => {
+        document.querySelectorAll('.flash').forEach(f => f.remove());
+    }, 5000);
+
+    /* Close confirm overlays on backdrop click */
+    document.getElementById('deleteConfirmOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeConfirm();
+    });
+    document.getElementById('clearConfirmOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeClearConfirm();
+    });
+</script>
+
+{% endblock %}
