@@ -93,8 +93,8 @@
                     <label class="form-label" for="loginUsername">Username</label>
                     <div class="form-input-wrap">
                         <span class="form-icon">👤</span>
-                        <input class="form-input" type="text" id="loginUsername" name="username"
-                            placeholder="Enter your username" autocomplete="username" required />
+                        <input class="form-input" type="text" id="loginUsername" name="login"
+                            placeholder="Enter your username or email" autocomplete="username" required />
                     </div>
                     <span class="field-error" id="loginUsernameErr">Please enter your username.</span>
                 </div>
@@ -241,7 +241,7 @@
     document.getElementById('formLogin').addEventListener('submit', function (e) {
         clearErrors();
         let ok = true;
-        if (!this.username.value.trim()) { showErr('loginUsernameErr', 'loginUsername'); ok = false; }
+        if (!this.login.value.trim()) { showErr('loginUsernameErr', 'loginUsername'); ok = false; }
         if (!this.password.value) { showErr('loginPasswordErr', 'loginPassword'); ok = false; }
         if (!ok) e.preventDefault();
     });

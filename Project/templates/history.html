@@ -12,27 +12,26 @@
 
 <!-- ── NAV (matches userhome exactly) ── -->
 <nav class="nav">
-    <a href="{{ url_for('home') }}" class="nav__brand">
+    <a class="nav__brand">
         <div class="nav__logo">🍳</div>
         <span class="nav__wordmark">Snap2Cook</span>
     </a>
     <ul class="nav__links">
         <li><a href="{{ url_for('userhome') }}">My Kitchen</a></li>
-        <li><a href="{{ url_for('history') }}" >History</a></li>
     </ul>
     <div class="nav__right">
+
         <div class="nav-user-menu" onclick="toggleUserMenu()">
-            Hello, <strong>{{ username }}</strong> ▼
+            Hello, <strong>{{ username }}</strong>▼
         </div>
+
         <div id="userMenu" class="user-menu">
             <a href="#" onclick="openEditUsername()">Edit Username</a>
             <a href="#" onclick="openChangePassword()">Change Password</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
-        <a href="{{ url_for('logout') }}" class="btn-nav-logout">Logout</a>
     </div>
 </nav>
-
-── FLASH MESSAGES ──
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <div class="flash-container">
@@ -181,8 +180,8 @@
                 </div>
 
                 <div class="recipe-card__footer">
-                    <button class="btn-show-more" onclick="openModal('hmodal{{ loop.index0 }}')">
-                        Show More
+                    <button class="btn-shown-moree" onclick="openModal('hmodal{{ loop.index0 }}')">
+                        Show More 
                     </button>
                     <button class="btn-delete-inline" onclick="openDeleteConfirm({{ r.id }}, '{{ r.recipe_name | e }}')"
                         style="

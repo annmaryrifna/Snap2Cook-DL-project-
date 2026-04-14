@@ -82,7 +82,7 @@
 }
 
 .auth-visual__wordmark {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: 1.6rem;
     letter-spacing: 0.06em;
     color: var(--white);

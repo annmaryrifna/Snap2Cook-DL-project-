@@ -1,7 +1,7 @@
 
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
+import random
 import json
 import pickle
 import re
@@ -186,7 +186,9 @@ def recommend_recipes(predicted_ingredient, calorie_limit=None, top_n=50):
             instr_list = instr
         else:
             instr_list = [s.strip() for s in re.split(r'\n|\r\n', str(instr)) if s.strip()]
-
+        if len(predicted_ingredient) > 1:
+            if not contains_all(ingr_simple_list, predicted_ingredient):
+                continue
         results.append({
     "name": row["Name"],
     "ingredients_simple": ingr_simple_list,
@@ -195,8 +197,9 @@ def recommend_recipes(predicted_ingredient, calorie_limit=None, top_n=50):
     "calories": cal_float,
     "image": get_first_image(row["Images"])
 })
-
+    random.shuffle(results)
     return results
+
 # --------------------------------------------------
 # Recipe Recommendation using spoonacular API
 # --------------------------------------------------
@@ -294,13 +297,14 @@ def login():
 
     if request.method == "POST":
 
-        username = request.form["username"]
-        password = request.form["password"]
+        #username = request.form["username"]
+        login_input = request.form.get("login")
+        password = request.form.get("password")
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+        cursor.execute("SELECT * FROM users WHERE username=%s or email=%s", (login_input, login_input,))
         user = cursor.fetchone()
 
         cursor.close()
@@ -425,20 +429,31 @@ def userhome():
         recipes = recommend_recipes(
             ingredient_list,
             calorie_limit=calorie_limit,
-            top_n=50
+            top_n=30
         )
 
-        total_recipes = len(recipes)
-        if total_recipes < 5:
+        
+        if len(ingredient_list) > 1 and total_recipes == 0:
+            api_recipes = fetch_spoonacular_recipes( ingredient_list,calorie_limit, max_results=20)
+            filtered_api = [  r for r in api_recipes
+                               if contains_all(r["ingredients_simple"], ingredient_list)
+                            ]
+            if filtered_api:
+                recipes = filtered_api
+            else:
+                recipes = []  
+
+        
+        if len(recipes) < 5:
             api_recipes = fetch_spoonacular_recipes(
             ingredient_list,
-            calorie_limit )
+            calorie_limit,max_results=15  )
             
-            filtered_api = [ r for r in api_recipes if contains_all(r["ingredients_simple"], ingredient_list) and r["instructions"] != ["No instructions available."] ]
+            filtered_api = [r for r in api_recipes if contains_all(r["ingredients_simple"], ingredient_list) and r["instructions"] != ["No instructions available."]]
             api_recipes = filtered_api if filtered_api else api_recipes
-
+            random.shuffle(api_recipes)
             recipes.extend(api_recipes)
-
+        total_recipes = len(recipes)
     return render_template(
         "userhome.html",
         username=session["username"],

@@ -4,6 +4,8 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/userhome.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
@@ -11,7 +13,7 @@
 
 <!-- ── NAV ── -->
 <nav class="nav">
-  <a href="{{ url_for('home') }}" class="nav__brand">
+  <a class="nav__brand">
     <div class="nav__logo">🍳</div>
     <span class="nav__wordmark">Snap2Cook</span>
   </a>
@@ -29,9 +31,6 @@
       <a href="#" onclick="openChangePassword()">Change Password</a>
       <a href="{{ url_for('logout') }}">Logout</a>
     </div>
-
-    
-
   </div>
 </nav>
 
@@ -196,7 +195,7 @@
             TOP <em>Recipes</em>
           </h2>
           <p class="recipes-header__count" id="recipeCount">
-            Showing <strong id="shownCount">8</strong> of
+            Showing <strong id="shownCount">{{ 5 if total_recipes >= 5 else total_recipes }}</strong> of
             <strong>{{ total_recipes }}</strong> matches
           </p>
         </div>
@@ -248,11 +247,11 @@
       </div>
 
       <!-- Load more button -->
-      {% if total_recipes > 8 %}
+      {% if total_recipes > 5 %}
       <div class="load-more-row">
         <button class="btn-load-more" id="btnLoadMore" onclick="loadMore()">
           Show More Recipes
-          <span id="loadMoreCount">({{ [total_recipes - 8, 0] | max }} more)</span>
+          <span id="loadMoreCount">({{ [total_recipes - 5, 0] | max }} more)</span>
         </button>
       </div>
       {% endif %}
@@ -263,10 +262,21 @@
         <div class="no-results__icon">🔍</div>
         <h3 class="no-results__title">No Recipes Found</h3>
         <p class="no-results__desc">
+        
+          {% if predictions and predictions|length > 1 %}
+          No recipes found containing
+          <strong>{{ predictions | map(attribute='name') | join(', ') }}</strong>.
+          Try uploading fewer ingredients or different combinations.
+        
+          {% else %}
           No recipes match
-          {% if calorie_limit %}a calorie limit of <strong>{{ calorie_limit | int }} kcal</strong> for{% endif %}
+          {% if calorie_limit %}
+          a calorie limit of <strong>{{ calorie_limit | int }} kcal</strong> for
+          {% endif %}
           <strong>{{ prediction | title }}</strong>.
           Try increasing your calorie limit or removing the filter.
+          {% endif %}
+        
         </p>
       </div>
       {% endif %}
@@ -439,15 +449,7 @@
       })
       .catch(() => alert("Server error"));
   }
-  function toggleUserMenu() {
-    let menu = document.getElementById("userMenu");
-
-    if (menu.style.display === "block") {
-      menu.style.display = "none";
-    } else {
-      menu.style.display = "block";
-    }
-  }
+  
   /* ─────────────────────────────
      Upload zone — preview + filename
   ───────────────────────────── */
@@ -494,8 +496,8 @@
   /* ─────────────────────────────
      Load More Recipes
   ───────────────────────────── */
-  let shown = Math.min(8, {{ total_recipes }});
-  const total = {{ total_recipes }};
+  let shown = Math.min(5, "{{ total_recipes }}");
+  const total = Number("{{ total_recipes }}");  
   const BATCH = 5;
 
   function loadMore() {

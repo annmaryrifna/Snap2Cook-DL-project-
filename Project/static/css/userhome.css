@@ -2,6 +2,70 @@
    SNAP2COOK — User Home Page
    Clean, professional dashboard
 ═══════════════════════════════════════════ */
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    background: rgba(10, 12, 10, 0.75);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+
+}
+
+.nav__logo {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--green), var(--forest));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 0 20px rgba(61, 138, 90, 0.3);
+}
+
+.nav__wordmark {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.7rem;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    line-height: 1;
+}
+
+.nav__links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+}
+
+.nav__links a {
+    text-decoration: none;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-family: 'Times New Roman', Times, serif;
+    color: var(--muted);
+}
+
+.nav__links a:hover {
+    color: var(--lime);
+}
+
 .nav__right {
     display: flex;
     align-items: center;
@@ -40,7 +104,6 @@
 .user-menu a:hover {
     background: #2a333c;
 }
-
 /* ════════════════════════
    PAGE SHELL
 ════════════════════════ */
@@ -167,7 +230,6 @@
     width: 140px;
     height: 55px;
     padding-top: 1.2rem;
-
 }
 
 .uh-history-btn:hover {
@@ -393,7 +455,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 14px;
-    margin-top: 1px;
+    margin-top:1px;
     width: 100%;
 }
 
@@ -740,10 +802,8 @@
     align-items: center;
     justify-content: flex-end;
 }
-
 .btn-save {
-    background: rgba(61, 138, 90, 0.1);
-    ;
+    background: rgba(61, 138, 90, 0.1);;
     border: 1px solid rgba(61, 138, 90, 0.35);
     color: var(--lime);
     padding: 4px 10px;
@@ -758,7 +818,6 @@
 .btn-save:hover {
     background: rgba(61, 138, 90, 0.1);
 }
-
 .btn-show-more {
     background: none;
     border: none;
@@ -1070,7 +1129,6 @@
     color: var(--muted);
     font-style: italic;
 }
-
 /*profile modal*/
 .profile-modal {
     position: fixed;
