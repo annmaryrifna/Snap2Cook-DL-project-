@@ -27,9 +27,10 @@
     <div id="userMenu" class="user-menu">
       <a href="#" onclick="openEditUsername()">Edit Username</a>
       <a href="#" onclick="openChangePassword()">Change Password</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 
-    <a href="{{ url_for('logout') }}" class="btn-nav-logout">Logout</a>
+    
 
   </div>
 </nav>
@@ -76,10 +77,11 @@
         <div class="uh-stat-pill__num">96%</div>
         <div class="uh-stat-pill__label">Accuracte</div>
       </div>
+      <div class="uh-history-btn">
+        <a href="/history" class="uh-stat-pill__label">Recipe History</a>
+      </div>
     </div>
-    <div class="uh-history-center">
-      <a href="/history" class="uh-history-btn">Recipe History</a>
-    </div>
+   
   </div>
 
 
@@ -95,12 +97,12 @@
       <form method="POST" action="{{ url_for('userhome') }}" enctype="multipart/form-data" id="predictForm">
 
         <!-- Upload zone -->
-<div class="uh-panel__section-title">
-  <span>📸 Upload Ingredient</span>
-  <a href="{{ url_for('userhome') }}" class="refresh-btn">
-    <i class="fa-solid fa-rotate-right"></i>
-  </a>
-</div>
+        <div class="uh-panel__section-title">
+          <span>📸 Upload Ingredient</span>
+          <a href="{{ url_for('userhome') }}" class="refresh-btn">
+            <i class="fa-solid fa-rotate-right"></i>
+          </a>
+        </div>
         <div class="upload-zone" id="uploadZone">
           <div class="upload-zone__placeholder" id="uploadPlaceholder">
             <span class="upload-zone__icon">📷</span>
@@ -108,7 +110,8 @@
             <p class="upload-zone__hint">or click to browse</p>
           </div>
           <img src="" alt="Preview" class="upload-zone__preview" id="previewImg" />
-          <input type="file" name="image" id="imageInput" class="upload-zone__input" accept="image/*" multiple required />
+          <input type="file" name="image" id="imageInput" class="upload-zone__input" accept="image/*" multiple
+            required />
         </div>
         <div class="upload-zone__filename" id="filenameDisplay"></div>
 
@@ -134,36 +137,36 @@
       </form>
 
       <!-- ── Prediction result (shown after POST) ── -->
-    {% if predictions %}
-    <div class="pred-result">
-    
-      <div class="pred-result__label">Detected Ingredients</div>
-    
-      <div class="pred-images">
-    
-        {% for p in predictions %}
-        <div class="pred-item">
-    
-          <img src="{{ url_for('static', filename=p.image) }}" class="pred-img" />
-    
-          <div class="pred-name">
-            {{ p.name | title }}
+      {% if predictions %}
+      <div class="pred-result">
+
+        <div class="pred-result__label">Detected Ingredients</div>
+
+        <div class="pred-images">
+
+          {% for p in predictions %}
+          <div class="pred-item">
+
+            <img src="{{ url_for('static', filename=p.image) }}" class="pred-img" />
+
+            <div class="pred-name">
+              {{ p.name | title }}
+            </div>
+
           </div>
-    
+          {% endfor %}
+
         </div>
-        {% endfor %}
-    
+
       </div>
-    
-    </div>
-    {% endif %}
+      {% endif %}
     </aside>
 
     <!-- ── RIGHT — RECIPES PANEL ── -->
     <div class="uh-recipes">
 
       {% if not prediction %}
-      <!-- Welcome / empty state -->
+
       <div class="uh-welcome">
         <div class="uh-welcome__emojis">
           <span>🥕</span><span>🍅</span><span>🥦</span><span>🍋</span>
@@ -174,8 +177,9 @@
           recipes — filtered to your calorie goal if you set one.
         </p>
         <div class="uh-welcome__tags">
-          {% for veg in ['Carrot','Tomato','Spinach','Apple','Banana','Broccoli','Bell
-          Pepper','Onion','Potato','Cucumber'] %}
+          {% for veg in ['apple','banana','beetroot','cabbage','capsicum','carrot','cauliflower','chilli
+          pepper','corn','cucumber','eggplant','garlic','ginger','grapes','kiwi','lemon','lettuce','mango','onion','orange','pear','peas','pineapple','pomegranate','potato','raddish','soy
+          beans','spinach','sweetpotato','tomato','turnip','watermelon'] %}
           <span class="uh-tag">{{ veg }}</span>
           {% endfor %}
         </div>
@@ -230,10 +234,10 @@
               {{ r.ingredients_simple | join(', ') if r.ingredients_simple else 'No ingredients listed' }}
             </div>
             <div class="recipe-card__footer">
-                <!-- SAVE BUTTON -->
-                <button class="btn-save" onclick='saveRecipe({{ r | tojson | safe }}, {{ predictions | tojson | safe }})'>
-                  💾Save
-                </button>
+              <!-- SAVE BUTTON -->
+              <button class="btn-save" onclick='saveRecipe({{ r | tojson | safe }}, {{ predictions | tojson | safe }})'>
+                💾Save
+              </button>
               <button class="btn-show-more" onclick="openModal({{ loop.index0 }})">
                 Show More
               </button>
@@ -411,30 +415,30 @@
 <script>
   function saveRecipe(recipe, predictions) {
 
-      fetch("/save_recipe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name: recipe.name,
-          image: recipe.image,
-          calories: recipe.calories,
-          ingredients: recipe.ingredients_full || recipe.ingredients_simple,
-          instructions: recipe.instructions,
-          predicted: predictions.map(p => p.name)
-        })
+    fetch("/save_recipe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: recipe.name,
+        image: recipe.image,
+        calories: recipe.calories,
+        ingredients: recipe.ingredients_full || recipe.ingredients_simple,
+        instructions: recipe.instructions,
+        predicted: predictions.map(p => p.name)
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === "success") {
-            alert("Recipe saved successfully!");
-          } else {
-            alert("Error saving recipe");
-          }
-        })
-        .catch(() => alert("Server error"));
-    }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          alert("Recipe saved successfully!");
+        } else {
+          alert("Error saving recipe");
+        }
+      })
+      .catch(() => alert("Server error"));
+  }
   function toggleUserMenu() {
     let menu = document.getElementById("userMenu");
 
@@ -545,7 +549,7 @@
       document.body.style.overflow = '';
     }
   });
- function toggleUserMenu() {
+  function toggleUserMenu() {
     let menu = document.getElementById("userMenu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
   }
