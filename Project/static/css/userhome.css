@@ -40,6 +40,7 @@
 .user-menu a:hover {
     background: #2a333c;
 }
+
 /* ════════════════════════
    PAGE SHELL
 ════════════════════════ */
@@ -136,6 +137,8 @@
     text-transform: uppercase;
     color: var(--muted);
     margin-top: 0.1rem;
+    text-decoration: none;
+
 }
 
 .uh-history-center {
@@ -149,15 +152,22 @@
 }
 
 .uh-history-btn {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 0.08em;
-    color: var(--white);
-    padding: 0.5rem 1.6rem;
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.04);
-    transition: 0.25s;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.1rem;
+    text-decoration: none;
+    width: 140px;
+    height: 55px;
+    padding-top: 1.2rem;
+
 }
 
 .uh-history-btn:hover {
@@ -383,7 +393,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 14px;
-    margin-top:1px;
+    margin-top: 1px;
     width: 100%;
 }
 
@@ -730,8 +740,10 @@
     align-items: center;
     justify-content: flex-end;
 }
+
 .btn-save {
-    background: rgba(61, 138, 90, 0.1);;
+    background: rgba(61, 138, 90, 0.1);
+    ;
     border: 1px solid rgba(61, 138, 90, 0.35);
     color: var(--lime);
     padding: 4px 10px;
@@ -746,6 +758,7 @@
 .btn-save:hover {
     background: rgba(61, 138, 90, 0.1);
 }
+
 .btn-show-more {
     background: none;
     border: none;
@@ -1057,6 +1070,7 @@
     color: var(--muted);
     font-style: italic;
 }
+
 /*profile modal*/
 .profile-modal {
     position: fixed;
