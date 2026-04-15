@@ -234,10 +234,10 @@
             </div>
             <div class="recipe-card__footer">
               <!-- SAVE BUTTON -->
-              <button class="btn-save" onclick='saveRecipe({{ r | tojson | safe }}, {{ predictions | tojson | safe }})'>
-                💾Save
-              </button>
-              <button class="btn-show-more" onclick="openModal({{ loop.index0 }})">
+            <button class="btn-save" data-recipe='{{ r | tojson | safe }}' data-predictions='{{ predictions | tojson | safe }}'
+              onclick="saveRecipeFromDataset(this)"> Save
+            </button>
+              <button class="btn-show-more" onclick="openModal('{{ loop.index0 }}')">
                 Show More
               </button>
             </div>
@@ -423,6 +423,12 @@
      PAGE SCRIPTS
 ══════════════════════════════ -->
 <script>
+  function saveRecipeFromDataset(btn) {
+      const recipe = JSON.parse(btn.dataset.recipe);
+      const predictions = JSON.parse(btn.dataset.predictions);
+
+      saveRecipe(recipe, predictions);
+    }
   function saveRecipe(recipe, predictions) {
 
     fetch("/save_recipe", {

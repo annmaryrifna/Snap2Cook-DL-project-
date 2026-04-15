@@ -730,21 +730,25 @@ body {
 
 /* BUTTON */
 .btn-shown-moree {
-        background: none;
-            border: none;
-            color: var(--lime);
-            font-family: 'Syne', sans-serif;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: left;
-            gap: 0.3rem;
-            padding: 0;
-            transition: color 0.2s;
-            margin-right: 160px;
+    background: none;
+    border: none;
+    color: var(--lime);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    padding: 0;
+    transition: color 0.2s;
+
+    margin-right: auto;
+    /* ✅ pushes left correctly */
 }
 
 .btn-shown-moree:hover {

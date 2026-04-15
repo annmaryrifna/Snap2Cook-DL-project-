@@ -135,10 +135,10 @@
             data-ingredient="{{ r.predicted_ingredient | lower if r.predicted_ingredient else '' }}"
             data-calories="{{ r.calories if r.calories else 0 }}"
             data-date="{{ r.saved_at.isoformat() if r.saved_at else '' }}"
-            style="animation-delay: {{ loop.index0 * 0.05 }}s">
+            style="animation-delay: '{{ loop.index0 * 0.05 }}'s">
 
             <!-- Delete btn (top right, appears on hover) -->
-            <button class="btn-delete-card" onclick="openDeleteConfirm({{ r.id }}, '{{ r.recipe_name | e }}')"
+            <button class="btn-delete-card" onclick="openDeleteConfirm('{{ r.id }}', '{{ r.recipe_name | e }}')"
                 title="Delete recipe">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -181,9 +181,9 @@
 
                 <div class="recipe-card__footer">
                     <button class="btn-shown-moree" onclick="openModal('hmodal{{ loop.index0 }}')">
-                        Show More 
+                        Show More→
                     </button>
-                    <button class="btn-delete-inline" onclick="openDeleteConfirm({{ r.id }}, '{{ r.recipe_name | e }}')"
+                    <button class="btn-delete-inline" onclick="openDeleteConfirm('{{ r.id }}', '{{ r.recipe_name | e }}')"
                         style="
                     background:rgba(235,87,87,.08);border:1px solid rgba(235,87,87,.25);
                     border-radius:6px;color:#eb5757;font-size:.78rem;font-weight:500;

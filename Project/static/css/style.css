@@ -17,7 +17,7 @@
 :root {
     --black: #0a0c0a;
     --charcoal: #111411;
-    --panel: #161a16;
+    --panel: #326546;
     --panel2: #1c211c;
     --border: rgba(255, 255, 255, 0.07);
     --forest: #2a5c3f;
@@ -27,7 +27,7 @@
     --amber: #e89338;
     --cream: #f2ead8;
     --white: #ffffff;
-    --muted: rgba(255, 255, 255, 0.45);
+    --muted:var(--black)
     --subtle: rgba(255, 255, 255, 0.12);
 }
 
@@ -188,20 +188,13 @@ body::before {
     background: url('https://images.unsplash.com/photo-1540420773420-3366772f4999?w=1900&q=80') center/cover no-repeat;
 }
 
-.hero__bg-overlay {
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(to right, rgba(10, 12, 10, 0.97) 0%, rgba(10, 12, 10, 0.75) 55%, rgba(10, 12, 10, 0.2) 100%),
-        linear-gradient(to top, var(--black) 0%, transparent 40%);
-}
 
 .hero__bg-overlay {
     position: absolute;
     inset: 0;
     background:
         linear-gradient(to right,
-            rgba(10, 12, 10, 0.85) 0%,
+            rgba(33, 39, 33, 0.85) 0%,
             rgba(10, 12, 10, 0.55) 40%,
             rgba(10, 12, 10, 0.25) 70%,
             rgba(10, 12, 10, 0.10) 100%);
@@ -617,7 +610,7 @@ body::before {
 ════════════════════════ */
 .bento-section {
     padding: 6rem 2.5rem;
-    background: #ffffff;
+    background: #060606;
     color: #111;
 }
 
@@ -657,7 +650,7 @@ body::before {
 
 .section-sub {
     font-size: 0.95rem;
-    color: var(--muted);
+    color:var(--white) ;
     max-width: 420px;
     line-height: 1.75;
     font-weight: 400;
@@ -1077,11 +1070,12 @@ body::before {
 
 .cta__desc {
     font-size: 1rem;
-    color: var(--muted);
+    color: var(--white);
     line-height: 1.75;
     max-width: 460px;
     margin: 0 auto 2.8rem;
     font-weight: 300;
+    margin-top: 20px;
 }
 
 .btn--cta {
@@ -1130,7 +1124,7 @@ footer {
 }
 
 .footer__wordmark {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     font-size: 1.4rem;
     letter-spacing: 0.06em;
     color: rgba(255, 255, 255, 0.6);
