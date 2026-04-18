@@ -872,3 +872,45 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ════════════════════════
+   MOBILE NAV FIX
+════════════════════════ */
+@media (max-width: 768px) {
+
+    .nav {
+        padding: 0 1rem;
+        /* reduce side space */
+        height: 56px;
+    }
+
+    .nav__wordmark {
+        font-size: 1.2rem;
+        /* smaller logo text */
+    }
+
+    .nav__logo {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .nav__right {
+        gap: 8px;
+    }
+
+    .nav-user-menu {
+        font-size: 0.8rem;
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /* prevents overflow */
+    }
+
+    /* OPTIONAL: hide "Hello," text */
+    .nav-user-menu::before {
+        content: "";
+        /* removes "Hello," effect */
+    }
+}
