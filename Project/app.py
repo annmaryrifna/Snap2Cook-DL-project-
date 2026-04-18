@@ -55,10 +55,10 @@ for var in required_env:
 # --------------------------------------------------
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",     
-        database="Snap2Cook",
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
         autocommit=True
     )
 
