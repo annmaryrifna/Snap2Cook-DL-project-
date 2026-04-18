@@ -327,48 +327,55 @@ def login():
 # --------------------------------------------------
 # SIGNUP
 # --------------------------------------------------
-@app.route("/signup", methods=["POST"])
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
 
-    username = request.form["username"]
-    email = request.form["email"]
-    password = request.form["password"]
+    if request.method == "POST":
 
-    hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        if not username or not email or not password:
+            flash("All fields are required", "error")
+            return redirect(url_for("login"))
 
-    cursor.execute(
-        "SELECT * FROM users WHERE username=%s OR email=%s",
-        (username,email)
-    )
+        if len(password) < 6:
+            flash("Password must be at least 6 characters", "error")
+            return redirect(url_for("login"))
 
-    if cursor.fetchone():
+        hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-        flash("User already exists","error")
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
+        # Check email
+        cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+        if cursor.fetchone():
+            flash("Email already registered.", "error")
+            return redirect(url_for("login"))
+
+        # Check username
+        cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
+        if cursor.fetchone():
+            flash("Username already taken.", "error")
+            return redirect(url_for("login"))
+
+        # Insert
+        cursor.execute(
+            "INSERT INTO users(username,email,password) VALUES(%s,%s,%s)",
+            (username,email,hashed_pw)
+        )
+
+        conn.commit()
         cursor.close()
         conn.close()
 
+        flash("Account created successfully!", "success")
         return redirect(url_for("login"))
 
-    cursor.execute(
-        "INSERT INTO users(username,email,password) VALUES(%s,%s,%s)",
-        (username,email,hashed_pw)
-    )
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    flash("Account created successfully! Please login.","success")
-
-    return redirect(url_for("login"))
-
-
-# --------------------------------------------------
+    # ✅ VERY IMPORTANT (handles GET)
+    return render_template("login.html", tab="signup")# --------------------------------------------------
 # USER HOME
 # --------------------------------------------------
 @app.route("/userhome", methods=["GET", "POST"])
@@ -655,7 +662,7 @@ def change_password():
 # --------------------------------------------------
 # FORGOT PASSWORD
 # --------------------------------------------------
-@app.route("/forgot-password", methods=["GET","POST"])
+@app.route("/forgot_password", methods=["GET","POST"])
 def forgot_password():
 
     if request.method == "POST":
@@ -673,7 +680,6 @@ def forgot_password():
         if user:
 
             token = serializer.dumps(email, salt='password-reset')
-
             reset_url = url_for('reset_password', token=token, _external=True)
 
             msg = Message(
@@ -682,7 +688,7 @@ def forgot_password():
             )
 
             msg.body = f"""
-Reset your password by clicking the link below:
+     Reset your password by clicking the link below:
 
 {reset_url}
 
@@ -692,9 +698,8 @@ If you didn't request this, ignore this email.
             mail.send(msg)
 
         flash("If the email exists, a reset link was sent.","info")
-
-    return render_template("forgot_password.html")
-
+        return redirect(url_for("login"))
+    return redirect(url_for("login"))
 # --------------------------------------------------
 # RESET PASSWORD
 # --------------------------------------------------
