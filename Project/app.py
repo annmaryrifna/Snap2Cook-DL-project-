@@ -54,13 +54,23 @@ for var in required_env:
 # MySQL Connection
 # --------------------------------------------------
 def get_db_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        autocommit=True
-    )
+
+    if os.getenv("ENV") == "local":
+        return mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+            autocommit=True
+        )
+    else:
+        return mysql.connector.connect(
+            host=os.getenv("CLOUD_DB_HOST"),
+            user=os.getenv("CLOUD_DB_USER"),
+            password=os.getenv("CLOUD_DB_PASSWORD"),
+            database=os.getenv("CLOUD_DB_NAME"),
+            autocommit=True
+        )
 
 
 # --------------------------------------------------
