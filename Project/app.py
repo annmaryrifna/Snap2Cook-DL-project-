@@ -136,7 +136,7 @@ def predict_image(img_path):
 
     preds = cnn_model.predict(img_arr)[0]
 
-    # Top 3 predictions
+    
     top_indices = preds.argsort()[-3:][::-1]
 
     ingredients = []
@@ -240,7 +240,7 @@ def fetch_spoonacular_recipes(ingredients, calorie_limit=None, max_results=10):
 
     for r in data.get("results", []):
 
-        # ---------- INGREDIENTS ----------
+        
         ingr_full = []
         ingr_simple = []
 
@@ -257,7 +257,7 @@ def fetch_spoonacular_recipes(ingredients, calorie_limit=None, max_results=10):
             else:
                 ingr_full.append(name)
 
-        # ---------- INSTRUCTIONS ----------
+        
         instructions = []
         if r.get("analyzedInstructions"):
             for ins in r["analyzedInstructions"]:
@@ -272,7 +272,7 @@ def fetch_spoonacular_recipes(ingredients, calorie_limit=None, max_results=10):
         if not instructions:
             instructions=["No instructions available."]
             
-        # ---------- CALORIES ----------
+        
         calories = None
         nutrients = r.get("nutrition", {}).get("nutrients", [])
 
@@ -280,7 +280,7 @@ def fetch_spoonacular_recipes(ingredients, calorie_limit=None, max_results=10):
             if n["name"] == "Calories":
                 calories = int(n["amount"])
 
-        # ---------- FINAL OBJECT ----------
+        
         recipes.append({
             "name": r["title"],
             "ingredients_simple": ingr_simple,
@@ -359,19 +359,18 @@ def signup():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Check email
+        
         cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
         if cursor.fetchone():
             flash("Email already registered.", "error")
             return redirect(url_for("login"))
 
-        # Check username
         cursor.execute("SELECT * FROM users WHERE username=%s", (username,))
         if cursor.fetchone():
             flash("Username already taken.", "error")
             return redirect(url_for("login"))
 
-        # Insert
+        
         cursor.execute(
             "INSERT INTO users(username,email,password) VALUES(%s,%s,%s)",
             (username,email,hashed_pw)
@@ -384,8 +383,9 @@ def signup():
         flash("Account created successfully!", "success")
         return redirect(url_for("login"))
 
-    # ✅ VERY IMPORTANT (handles GET)
-    return render_template("login.html", tab="signup")# --------------------------------------------------
+   
+    return render_template("login.html", tab="signup")
+# --------------------------------------------------
 # USER HOME
 # --------------------------------------------------
 @app.route("/userhome", methods=["GET", "POST"])

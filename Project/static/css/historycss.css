@@ -1,7 +1,4 @@
-.body
-{
-background: var(--charcoal);
-}
+
 .nav {
     position: fixed;
     top: 0;
@@ -76,7 +73,7 @@ background: var(--charcoal);
 .nav-user-menu {
     cursor: pointer;
     font-weight: 500;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .user-menu {
@@ -658,7 +655,7 @@ background: var(--charcoal);
 
 body {
     background: var(--charcoal);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     color: var(--text);
     letter-spacing: 0.2px;
 }
