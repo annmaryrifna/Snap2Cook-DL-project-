@@ -67,7 +67,9 @@ The project uses the pretrained ResNet50 CNN architecture with transfer learning
 - Dropout Layer `(0.5)`
 - Dense Softmax Output Layer
 
-![Model Architecture](images/model.png)
+<p align="center">
+  <img src="images/architecture.png" width="500">
+</p>
 
 ---
 
@@ -100,6 +102,7 @@ The project uses the pretrained ResNet50 CNN architecture with transfer learning
 
 The model achieved high classification performance using transfer learning and deep feature extraction techniques.
 
+---
 
 ##  Recipe Recommendation System
 
@@ -150,13 +153,13 @@ Project/
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/snap2cook.git
-cd snap2cook
+git clone https://github.com/annmaryrifna/Snap2Cook-DL-project-.git
+cd Project
 ```
 
 ### Install Required Packages
